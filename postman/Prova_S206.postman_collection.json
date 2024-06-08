@@ -7,7 +7,7 @@
 	},
 	"item": [
 		{
-			"name": "Listar usuários",
+			"name": "Listar usuários com delay",
 			"event": [
 				{
 					"listen": "test",
@@ -15,6 +15,10 @@
 						"exec": [
 							"pm.test(\"Status code is 200\", function () {",
 							"    pm.response.to.have.status(200);",
+							"});",
+							"",
+							"pm.test(\"Tempo de resposta é de aproximadamente 3 segundos\", function () {",
+							"    pm.expect(pm.response.responseTime).to.be.above(3000);",
 							"});",
 							"",
 							"pm.test(\"Dados contém o valor da página e array possui tamanho esperado\", function () {",
@@ -30,8 +34,11 @@
 				{
 					"listen": "prerequest",
 					"script": {
-						"exec": [],
-						"type": "text/javascript"
+						"exec": [
+							""
+						],
+						"type": "text/javascript",
+						"packages": {}
 					}
 				}
 			],
@@ -39,7 +46,7 @@
 				"method": "GET",
 				"header": [],
 				"url": {
-					"raw": "https://reqres.in/api/users?page=2",
+					"raw": "https://reqres.in/api/users?delay=3&page=2",
 					"protocol": "https",
 					"host": [
 						"reqres",
@@ -51,6 +58,10 @@
 					],
 					"query": [
 						{
+							"key": "delay",
+							"value": "3"
+						},
+						{
 							"key": "page",
 							"value": "2"
 						}
@@ -60,16 +71,20 @@
 			"response": []
 		},
 		{
-			"name": "Não encontra usuário com ID inexistente",
+			"name": "Não faz login sem campos adequados",
 			"event": [
 				{
 					"listen": "test",
 					"script": {
 						"exec": [
-							"pm.test(\"Status code is 404\", function () {",
-							"    pm.response.to.have.status(404);",
+							"pm.test(\"Status code is 400\", function () {",
+							"    pm.response.to.have.status(400);",
 							"});",
-							""
+							"",
+							"pm.test(\"Checa se a senha está faltando\", function () {",
+							"    var jsonData = pm.response.json();",
+							"    pm.expect(jsonData.error).to.eql(\"Missing password\");",
+							"});"
 						],
 						"type": "text/javascript",
 						"packages": {}
@@ -78,20 +93,20 @@
 				{
 					"listen": "prerequest",
 					"script": {
-						"exec": [],
-						"type": "text/javascript"
+						"exec": [
+							""
+						],
+						"type": "text/javascript",
+						"packages": {}
 					}
 				}
 			],
-			"protocolProfileBehavior": {
-				"disableBodyPruning": true
-			},
 			"request": {
-				"method": "GET",
+				"method": "POST",
 				"header": [],
 				"body": {
 					"mode": "raw",
-					"raw": "{\n    \"name\": \"Usuário Teste\",\n    \"email\": \"usuario_teste.@company.example\",\n    \"gender\": \"male\",\n    \"active\": \"inactive\"\n}",
+					"raw": "{\n    \"email\": \"usuario@teste.com\"\n}",
 					"options": {
 						"raw": {
 							"language": "json"
@@ -99,7 +114,7 @@
 					}
 				},
 				"url": {
-					"raw": "https://reqres.in/api/users/100",
+					"raw": "https://reqres.in/api/login",
 					"protocol": "https",
 					"host": [
 						"reqres",
@@ -107,15 +122,14 @@
 					],
 					"path": [
 						"api",
-						"users",
-						"100"
+						"login"
 					]
 				}
 			},
 			"response": []
 		},
 		{
-			"name": "Listar tarefas",
+			"name": "Alterar Usuário",
 			"event": [
 				{
 					"listen": "test",
@@ -171,19 +185,18 @@
 			"response": []
 		},
 		{
-			"name": "Criar usuário",
+			"name": "Login de usuário",
 			"event": [
 				{
 					"listen": "test",
 					"script": {
 						"exec": [
-							"pm.test(\"Status code is 201\", function () {",
-							"    pm.response.to.have.status(201);",
+							"pm.test(\"Status code is 200\", function () {",
+							"    pm.response.to.have.status(200);",
 							"});",
 							"",
-							"pm.test(\"Nome e profissão estão presentes na resposta\", function () {",
-							"    pm.expect(pm.response.text()).to.include(\"Greg\");",
-							"    pm.expect(pm.response.text()).to.include(\"Footbal Player\");",
+							"pm.test(\"Contém um token para\", function () {",
+							"    pm.expect(pm.response.text()).to.include(\"token\");",
 							"});"
 						],
 						"type": "text/javascript",
@@ -206,7 +219,7 @@
 				"header": [],
 				"body": {
 					"mode": "raw",
-					"raw": "{\n    \"name\": \"Greg\",\n    \"job\": \"Footbal Player\"\n}",
+					"raw": "{\n    \"email\": \"eve.holt@reqres.in\",\n    \"password\": \"cityslicka\"\n}",
 					"options": {
 						"raw": {
 							"language": "json"
@@ -214,7 +227,7 @@
 					}
 				},
 				"url": {
-					"raw": "https://reqres.in/api/users",
+					"raw": "https://reqres.in/api/login",
 					"protocol": "https",
 					"host": [
 						"reqres",
@@ -222,7 +235,7 @@
 					],
 					"path": [
 						"api",
-						"users"
+						"login"
 					]
 				}
 			},
